@@ -1,6 +1,7 @@
 import streamlit as st
 import json
 import os
+import streamlit.components.v1 as components
 from spotify_client import search_songs_by_mood
 
 # File for storing favorites
@@ -27,7 +28,7 @@ if 'favorites' not in st.session_state:
 
 # App Title
 st.title("🎵 AI Music Recommendation System")
-st.write("Enter your mood and get real-time song suggestions!")
+st.write("Enter your mood and get real-time Spotify song suggestions with in-app music player!")
 
 # Mood Input
 mood = st.text_input("Enter your mood (happy, sad, relaxed, energetic, etc.):")
@@ -47,25 +48,40 @@ if st.button("Get Recommendations"):
     else:
         st.warning("Please enter a mood to get recommendations.")
 
-# Show recommended songs
+# Show recommended songs with embedded player
 if 'current_songs' in st.session_state and st.session_state['current_songs']:
     st.subheader("Recommended Songs:")
     for index, s in enumerate(st.session_state['current_songs']):
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            st.markdown(f"**{s['name']}** by *{s['artist']}* → [Listen]({s['url']})")
-        with col2:
-            if st.button("❤️", key=f"fav_{index}"):
-                if s not in st.session_state['favorites']:
-                    st.session_state['favorites'].append(s)
-                    save_favorites(st.session_state['favorites'])  # Save to file
-                    st.success(f"Added {s['name']} to favorites!")
+        st.markdown(f"**{s['name']}** by *{s['artist']}*")
+        
+        # Convert Spotify track link to embed link
+        track_url = s['url']
+        embed_url = track_url.replace("open.spotify.com/track", "open.spotify.com/embed/track")
+        
+        # Embed Spotify player
+        components.iframe(embed_url, height=80)
+        
+        # Favorite button
+        if st.button("❤️ Add to Favorites", key=f"fav_{index}"):
+            if s not in st.session_state['favorites']:
+                st.session_state['favorites'].append(s)
+                save_favorites(st.session_state['favorites'])
+                st.success(f"Added {s['name']} to favorites!")
 
-# Favorites Section
+# Favorites Section with embedded player and remove option
 st.markdown("---")
 st.subheader("⭐ Your Favorite Songs")
 if st.session_state['favorites']:
-    for fav in st.session_state['favorites']:
-        st.markdown(f"**{fav['name']}** by *{fav['artist']}* → [Listen]({fav['url']})")
+    for i, fav in enumerate(st.session_state['favorites']):
+        col1, col2 = st.columns([4, 1])
+        with col1:
+            st.markdown(f"**{fav['name']}** by *{fav['artist']}*")
+            fav_embed_url = fav['url'].replace("open.spotify.com/track", "open.spotify.com/embed/track")
+            components.iframe(fav_embed_url, height=80)
+        with col2:
+            if st.button("❌ Remove", key=f"remove_{i}"):
+                st.session_state['favorites'].pop(i)
+                save_favorites(st.session_state['favorites'])
+                st.experimental_rerun()  # Refresh to update UI
 else:
     st.write("No favorites yet. Add some by clicking ❤️.")
