@@ -28,7 +28,7 @@ if 'favorites' not in st.session_state:
 
 # App Title
 st.title("🎵 AI Music Recommendation System")
-st.write("Enter your mood and get real-time Spotify song suggestions with in-app music player!")
+st.write("Enter your mood and get real-time song suggestions with in-app music player!")
 
 # Mood Input
 mood = st.text_input("Enter your mood (happy, sad, relaxed, energetic, etc.):")

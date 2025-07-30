@@ -1,0 +1,3 @@
+first cd ai-music-recommender
+activate venv/Scripts/activate
+then streamlit run app.py
